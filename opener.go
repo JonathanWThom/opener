@@ -1,4 +1,4 @@
-// Opener opens stores and then opens and closes programs for you.
+// Opener opens and closes applications for you.
 // Jump start your day or shut down easily.
 package main
 
@@ -49,13 +49,12 @@ func main() {
 			} else {
 				cmd = "open"
 			}
-
 			err := exec.Command(cmd, "-a", app).Run()
 			if err != nil {
 				log.Fatal(err)
 			}
-
 		}(app)
 	}
+
 	wg.Wait()
 }
