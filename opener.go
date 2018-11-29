@@ -51,7 +51,6 @@ func main() {
 			}
 
 			err := exec.Command(cmd, "-a", app).Run()
-			// TODO: Handle the application not being found better
 			if err != nil {
 				log.Fatal(err)
 			}
