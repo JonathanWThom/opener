@@ -4,7 +4,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -12,10 +11,10 @@ import (
 	"sync"
 )
 
-var path = homeDir() + "/programs.json"
+var path = homeDir() + "/applications.json"
 var wg = &sync.WaitGroup{}
 
-type programs []string
+type applications []string
 
 func homeDir() string {
 	usr, _ := user.Current()
@@ -32,22 +31,23 @@ func main() {
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	prog := programs{}
-	err = decoder.Decode(&prog)
+	apps := applications{}
+	err = decoder.Decode(&apps)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, p := range prog {
+	for _, app := range apps {
 		wg.Add(1)
-		go func(p string) {
+		go func(app string) {
 			defer wg.Done()
-			err := exec.Command("open", "-a", p).Run()
+			err := exec.Command("open", "-a", app).Run()
+			// TODO: Handle the application not being found better
 			if err != nil {
-				fmt.Errorf("Could not open application: %s", p)
+				log.Fatal(err)
 			}
 
-		}(p)
+		}(app)
 	}
 	wg.Wait()
 }
