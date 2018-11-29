@@ -4,13 +4,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"os/user"
+	"sync"
 )
 
 var path = homeDir() + "/programs.json"
+var wg = &sync.WaitGroup{}
 
 type programs []string
 
@@ -35,11 +38,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// could these be done concurrently?
 	for _, p := range prog {
-		err := exec.Command("open", "-a", p).Run()
-		if err != nil {
-			log.Fatal(err)
-		}
+		wg.Add(1)
+		go func(p string) {
+			defer wg.Done()
+			err := exec.Command("open", "-a", p).Run()
+			if err != nil {
+				fmt.Errorf("Could not open application: %s", p)
+			}
+
+		}(p)
 	}
+	wg.Wait()
 }
