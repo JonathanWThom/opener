@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 
 var path = homeDir() + "/applications.json"
 var wg = &sync.WaitGroup{}
+var close = flag.Bool("c", false, "add c flag to close files")
 
 type applications []string
 
@@ -22,8 +24,8 @@ func homeDir() string {
 }
 
 func main() {
-	// add flags for open vs close
-	// add more descriptive errors
+	flag.Parse()
+
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +43,14 @@ func main() {
 		wg.Add(1)
 		go func(app string) {
 			defer wg.Done()
-			err := exec.Command("open", "-a", app).Run()
+			var cmd string
+			if *close {
+				cmd = "pkill"
+			} else {
+				cmd = "open"
+			}
+
+			err := exec.Command(cmd, "-a", app).Run()
 			// TODO: Handle the application not being found better
 			if err != nil {
 				log.Fatal(err)
