@@ -1,6 +1,6 @@
 # Opener
 
-Quickly open and close the applications you use everyday.
+Quickly open and close the applications you use every day.
 
 ### Installation
 
