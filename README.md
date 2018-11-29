@@ -29,7 +29,7 @@ In the root of your filesystem, create a file called applications.json.
 In that file, list the names of the files you want to use in an array, like [this](https://github.com/JonathanWThom/opener/blob/master/applications.json).
 
 To open all the applications in your list, simply run `opener`.
-When you want to close them, run `opener c`.
+When you want to close them, run `opener -c`.
 
 ### Notes
 
