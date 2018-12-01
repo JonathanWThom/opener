@@ -1,6 +1,13 @@
-[
-    "Google Chrome",
-    "Calendar",
-    "Notes",
-    "Postico"
-]
+{
+    "default": [
+        "Google Chrome",
+        "Slack",
+        "Calendar",
+        "Notes",
+        "Postico"
+    ],
+    "weekend": [
+        "Spotify",
+        "News"
+    ]
+}

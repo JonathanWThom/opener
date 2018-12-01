@@ -5,8 +5,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
-	"os"
 	"os/exec"
 	"os/user"
 	"sync"
@@ -15,8 +15,9 @@ import (
 var path = homeDir() + "/applications.json"
 var wg = &sync.WaitGroup{}
 var close = flag.Bool("c", false, "add c flag to close files")
+var group = flag.String("g", "default", "specify which group of files to open or close")
 
-type applications []string
+type applications map[string][]string
 
 func homeDir() string {
 	usr, _ := user.Current()
@@ -26,20 +27,18 @@ func homeDir() string {
 func main() {
 	flag.Parse()
 
-	file, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	apps := applications{}
-	err = decoder.Decode(&apps)
+	opts, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, app := range apps {
+	apps := make(applications)
+	err = json.Unmarshal(opts, &apps)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, app := range apps[*group] {
 		wg.Add(1)
 		go func(app string) {
 			defer wg.Done()
