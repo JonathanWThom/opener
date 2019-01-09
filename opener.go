@@ -12,6 +12,11 @@ import (
 	"sync"
 )
 
+const (
+	pkill = "pkill"
+	open  = "open"
+)
+
 var path = homeDir() + "/applications.json"
 var wg = &sync.WaitGroup{}
 var close = flag.Bool("c", false, "add c flag to close files")
@@ -44,11 +49,20 @@ func main() {
 			defer wg.Done()
 			var cmd string
 			if *close {
-				cmd = "pkill"
+				cmd = pkill
 			} else {
-				cmd = "open"
+				cmd = open
 			}
-			err := exec.Command(cmd, "-a", app).Run()
+
+			args := []string{"-a", app}
+
+			if cmd == open {
+				for _, site := range apps[app] {
+					args = append(args, site)
+				}
+			}
+			err = exec.Command(cmd, args...).Run()
+
 			if err != nil {
 				log.Fatal(err)
 			}

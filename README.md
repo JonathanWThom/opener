@@ -36,6 +36,23 @@ When you want to close them, run `opener -c`.
 To create extra groups, simply add another key with a corresponding list to `applications.json`. You can then open and close that group
 of apps by passing the `-g` flag. For example: `opener -g weekend` and `opener -c -g weekend`.
 
+##### Browsers
+
+When including web browsers in your list of applications, you can specify sites to open by default. Add another group with the name of
+the browser, and an array of sites you want to open, like this:
+
+```
+{
+    "default": [
+        "Google Chrome"
+    ],
+    "Google Chrome": [
+        "https://stackoverflow.com",
+        "https://twitter.com"
+    ]
+}
+```
+
 ### Notes
 
 This program was built on a my Mac, so probably only works on Unix systems.
