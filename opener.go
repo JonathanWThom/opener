@@ -5,6 +5,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os/exec"
@@ -47,27 +48,44 @@ func main() {
 		wg.Add(1)
 		go func(app string) {
 			defer wg.Done()
-			var cmd string
+
 			if *close {
-				cmd = pkill
+				err = closeApp(app)
 			} else {
-				cmd = open
+				err = openApp(app, apps)
 			}
-
-			args := []string{"-a", app}
-
-			if cmd == open {
-				for _, site := range apps[app] {
-					args = append(args, site)
-				}
-			}
-			err = exec.Command(cmd, args...).Run()
 
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
 			}
 		}(app)
 	}
 
 	wg.Wait()
+}
+
+func closeApp(app string) error {
+	cmd := fmt.Sprintf("ps cax | grep '%s'", app)
+	out, _ := exec.Command("bash", "-c", cmd).Output()
+	if string(out) == "" {
+		return nil
+	}
+
+	return exec.Command(pkill, "-SIGINT", "-a", app).Run()
+}
+
+func openApp(app string, apps applications) error {
+	cmd := fmt.Sprintf("ps cax | grep '%s'", app)
+	out, _ := exec.Command("bash", "-c", cmd).Output()
+	if string(out) != "" {
+		return nil
+	}
+
+	args := []string{"-a", app}
+
+	for _, site := range apps[app] {
+		args = append(args, site)
+	}
+
+	return exec.Command(open, args...).Run()
 }
