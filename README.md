@@ -55,7 +55,7 @@ the browser, and an array of sites you want to open, like this:
 
 ### Notes
 
-This program was built on a my Mac, so probably only works on Unix systems.
+This program was built on a Mac, so probably only works on Unix systems.
 
 If it doesn't work as intended, please open an issue!
 
