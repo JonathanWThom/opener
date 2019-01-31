@@ -75,12 +75,6 @@ func closeApp(app string) error {
 }
 
 func openApp(app string, apps applications) error {
-	cmd := fmt.Sprintf("ps cax | grep '%s'", app)
-	out, _ := exec.Command("bash", "-c", cmd).Output()
-	if string(out) != "" {
-		return nil
-	}
-
 	args := []string{"-a", app}
 
 	for _, site := range apps[app] {
