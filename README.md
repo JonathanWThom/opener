@@ -60,7 +60,7 @@ of apps by passing the `-g` flag. For example: `opener -g weekend` and `opener -
 
 ### Notes
 
-This program was built on a Mac, so probably only works on Unix systems.
+This program was built and compiled on MacOS, so probably only works with darwin amd64.
 
 If it doesn't work as intended, please open an issue!
 
