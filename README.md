@@ -22,6 +22,7 @@ mv opener /usr/local/bin/opener
 
 ### Usage
 
+##### Configuration
 In the root of your filesystem, create a file called applications.json.
 
 `touch ~/applications.json`
@@ -30,11 +31,8 @@ In that file, list the names of the files you want to use like [this](https://gi
 
 You will need to have one key that is "default" - these are the applications that will open and close with no additional arguments passed.
 
-To open all the applications in your list, simply run `opener`.
-When you want to close them, run `opener -c`.
-
-To create extra groups, simply add another key with a corresponding list to `applications.json`. You can then open and close that group
-of apps by passing the `-g` flag. For example: `opener -g weekend` and `opener -c -g weekend`.
+You can also set your default configuration via an interactive session by running `opener -s`. This currently only supports adding applications
+to your default list, but other operations will be supported in the future.
 
 ##### Browsers
 
@@ -52,6 +50,13 @@ the browser, and an array of sites you want to open, like this:
     ]
 }
 ```
+
+##### Opening and Closing
+To open all the applications in your list, simply run `opener`.
+When you want to close them, run `opener -c`.
+
+To create extra groups, simply add another key with a corresponding list to `applications.json`. You can then open and close that group
+of apps by passing the `-g` flag. For example: `opener -g weekend` and `opener -c -g weekend`.
 
 ### Notes
 
