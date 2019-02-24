@@ -31,8 +31,8 @@ In that file, list the names of the files you want to use like [this](https://gi
 
 You will need to have one key that is "default" - these are the applications that will open and close with no additional arguments passed.
 
-You can also set your default configuration via an interactive session by running `opener -s`. This currently only supports adding applications
-to your default list, but other operations will be supported in the future.
+You can also set your default configuration via an interactive session by running `opener -s`. This currently supports adding and removing applications
+from your default group only, but other groups and operations will be supported in the future.
 
 ##### Browsers
 

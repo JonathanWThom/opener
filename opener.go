@@ -5,6 +5,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -125,12 +126,12 @@ func readFile(file *os.File) []byte {
 }
 
 func printConfig(opts []byte) {
-	// Idea: Change this to just read applications, and format a bit nicer
 	n := len(opts)
 	s := string(opts[:n])
 	fmt.Println("Your current current configuration:\n")
 	fmt.Printf("%s\n\n", s)
-	fmt.Println("* Add to default list by typing 'a AppName'")
+	fmt.Println("* Add an app to your default group by typing 'a AppName'")
+	fmt.Println("* Remove an app from your default group by typing 'd AppName'")
 	fmt.Println("* Quit interactive session with 'quit'")
 }
 
@@ -147,29 +148,104 @@ func setConfig(opts []byte, apps applications) {
 		}
 		input = strings.TrimSuffix(input, "\n")
 
-		if input[:1] == "a" {
-			// Collect app name and add to default list
-			if len(input) > 1 {
-				apps["default"] = append(apps["default"], input[2:])
-				json, _ := json.Marshal(apps)
-				err := ioutil.WriteFile(path, json, 0755)
-				if err != nil {
-					fmt.Println(err)
-				} else {
-					fmt.Printf("Succesfully added %v to default opener list\n", input[2:])
-					file := openFile()
-					opts := readFile(file)
-					printConfig(opts)
-				}
-			} else {
-				fmt.Println("Must pass app name as argument to 'a'")
+		// Parse options
+		arg := input[:1]
+		if arg == "a" || arg == "d" {
+			err := modifyApps(input, &apps, arg)
+			if err != nil {
+				fmt.Println(err)
 			}
-		}
-
-		// End repl session
-		if input == "quit" {
+		} else if input == "quit" {
 			fmt.Println("Goodbye")
 			return
+		} else {
+			fmt.Printf("Could not recognize command: %s\n", input)
 		}
 	}
+}
+
+func modifyApps(input string, apps *applications, arg string) error {
+	if len(input) > 1 {
+		search := input[2:]
+		switch arg {
+		case "a":
+			err := addApp(search, apps)
+			if err != nil {
+				return err
+			}
+		case "d":
+			err := removeApp(search, apps)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		msg := fmt.Sprintf("Must pass app name as argument to '%s'", arg)
+		return errors.New(msg)
+	}
+
+	return nil
+}
+
+// addApp adds an app to the default group
+func addApp(search string, apps *applications) error {
+	_, found := stringInSlice(search, (*apps)["default"])
+	if found == true {
+		msg := fmt.Sprintf("%s already exists in default opener group", search)
+		return errors.New(msg)
+	}
+
+	(*apps)["default"] = append((*apps)["default"], search)
+	msg := fmt.Sprintf("Successfully added %s to default opener group", search)
+	err := rewriteApps(apps, msg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// removeApp looks for the application in the default group, and removes it if found
+func removeApp(search string, apps *applications) error {
+	if i, found := stringInSlice(search, (*apps)["default"]); found == true {
+		(*apps)["default"] = append((*apps)["default"][:i], (*apps)["default"][i+1:]...)
+		msg := fmt.Sprintf("Successfully removed %s from default opener group", search)
+		err := rewriteApps(apps, msg)
+		if err != nil {
+			return err
+		}
+	} else {
+		msg := fmt.Sprintf("Could not find %s in configuration\n", search)
+		return errors.New(msg)
+	}
+
+	return nil
+}
+
+func rewriteApps(apps *applications, msg string) error {
+	json, err := json.Marshal(apps)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(path, json, 0755)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(msg)
+	file := openFile()
+	opts := readFile(file)
+	printConfig(opts)
+
+	return nil
+}
+
+func stringInSlice(a string, list []string) (int, bool) {
+	for i, b := range list {
+		if b == a {
+			return i, true
+		}
+	}
+	return 0, false
 }
