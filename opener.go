@@ -27,8 +27,22 @@ var wg = &sync.WaitGroup{}
 var close = flag.Bool("c", false, "add c flag to close files")
 var group = flag.String("g", "default", "specify which group of files to open or close")
 var set = flag.Bool("s", false, "set applications.json file from command line")
+var sys System
 
 type applications map[string][]string
+
+// System implements Run, which is a wrapper for exec.Command.Run
+type System interface {
+	Run(string, ...string) error
+}
+
+// UserSystem is intantiated with the Run method
+type UserSystem struct{}
+
+// Run is wrapper around exec.Command.Run and can be mocked in tests
+func (r UserSystem) Run(command string, args ...string) error {
+	return exec.Command(command, args...).Run()
+}
 
 func homeDir() string {
 	usr, _ := user.Current()
@@ -36,6 +50,12 @@ func homeDir() string {
 }
 
 func main() {
+	sys = UserSystem{}
+	Run()
+}
+
+// Run does all the work and is testable
+func Run() {
 	flag.Parse()
 
 	// Open or create file at ~/applications.json
@@ -95,7 +115,7 @@ func closeApp(app string) error {
 		return nil
 	}
 
-	return exec.Command(pkill, "-SIGINT", "-a", app).Run()
+	return sys.Run(pkill, "-SIGINT", "-a", app)
 }
 
 func openApp(app string, apps applications) error {
@@ -105,7 +125,7 @@ func openApp(app string, apps applications) error {
 		args = append(args, site)
 	}
 
-	return exec.Command(open, args...).Run()
+	return sys.Run(open, args...)
 }
 
 func openFile() *os.File {
@@ -128,7 +148,7 @@ func readFile(file *os.File) []byte {
 func printConfig(opts []byte) {
 	n := len(opts)
 	s := string(opts[:n])
-	fmt.Println("Your current current configuration:\n")
+	fmt.Printf("Your current current configuration:\n\n")
 	fmt.Printf("%s\n\n", s)
 	fmt.Println("* Add an app to your default group by typing 'a AppName'")
 	fmt.Println("* Remove an app from your default group by typing 'd AppName'")

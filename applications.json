@@ -1,9 +1,9 @@
 {
     "default": [
-        "Google Chrome",
+        "Google Chrome Canary",
         "Slack",
         "Calendar",
-        "Notes",
+        "Notion",
         "Postico"
     ],
     "weekend": [
