@@ -34,20 +34,11 @@ type applications map[string][]string
 // System implements Run, which is a wrapper for exec.Command.Run
 type System interface {
 	Run(string, ...string) error
+	Output(string, ...string) ([]byte, error)
 }
 
 // UserSystem is intantiated with the Run method
 type UserSystem struct{}
-
-// Run is wrapper around exec.Command.Run and can be mocked in tests
-func (r UserSystem) Run(command string, args ...string) error {
-	return exec.Command(command, args...).Run()
-}
-
-func homeDir() string {
-	usr, _ := user.Current()
-	return usr.HomeDir
-}
 
 func main() {
 	sys = UserSystem{}
@@ -108,9 +99,23 @@ func Run() {
 	wg.Wait()
 }
 
+// Run is wrapper around exec.Command.Run and can be mocked in tests
+func (r UserSystem) Run(command string, args ...string) error {
+	return exec.Command(command, args...).Run()
+}
+
+func (r UserSystem) Output(command string, args ...string) ([]byte, error) {
+	return exec.Command(command, args...).Output()
+}
+
+func homeDir() string {
+	usr, _ := user.Current()
+	return usr.HomeDir
+}
+
 func closeApp(app string) error {
 	cmd := fmt.Sprintf("ps cax | grep '%s'", app)
-	out, _ := exec.Command("bash", "-c", cmd).Output()
+	out, _ := sys.Output("bash", "-c", cmd)
 	if string(out) == "" {
 		return nil
 	}
